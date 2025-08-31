@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:osb="http://www.openswatchbook.org/uri/2009/osb"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="400"
+   height="400"
+   viewBox="0 0 400 400.00001"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="secure voting.svg">
+  <defs
+     id="defs4">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient5777">
+      <stop
+         style="stop-color:#000000;stop-opacity:0"
+         offset="0"
+         id="stop5779" />
+      <stop
+         style="stop-color:#000000;stop-opacity:1"
+         offset="1"
+         id="stop5781" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient5771"
+       osb:paint="solid">
+      <stop
+         style="stop-color:#0000ff;stop-opacity:1;"
+         offset="0"
+         id="stop5773" />
+    </linearGradient>
+    <filter
+       inkscape:label="Dark Glass"
+       inkscape:menu="Bevels"
+       inkscape:menu-tooltip="Illuminated glass effect with light coming from beneath"
+       height="1.5"
+       width="1.5"
+       y="-0.25"
+       x="-0.25"
+       style="color-interpolation-filters:sRGB;"
+       id="filter4300">
+      <feBlend
+         in2="SourceGraphic"
+         result="result1"
+         mode="screen"
+         id="feBlend4302" />
+      <feGaussianBlur
+         stdDeviation="2"
+         result="result6"
+         id="feGaussianBlur4304" />
+      <feComposite
+         operator="xor"
+         in="result6"
+         in2="result1"
+         result="result7"
+         id="feComposite4306" />
+      <feComposite
+         result="result4"
+         in="result7"
+         operator="xor"
+         in2="result7"
+         id="feComposite4308" />
+      <feGaussianBlur
+         result="result3"
+         stdDeviation="3"
+         in="result4"
+         id="feGaussianBlur4310" />
+      <feSpecularLighting
+         result="result5"
+         specularExponent="55"
+         specularConstant="1.5"
+         surfaceScale="6"
+         in="result3"
+         id="feSpecularLighting4312">
+        <fePointLight
+           z="20000"
+           y="-8000"
+           x="-5000"
+           id="fePointLight4314" />
+      </feSpecularLighting>
+      <feComposite
+         in="result3"
+         k3="1"
+         k2="1.5"
+         operator="arithmetic"
+         in2="SourceGraphic"
+         result="result92"
+         id="feComposite4316" />
+      <feComposite
+         in="result5"
+         operator="atop"
+         in2="result92"
+         result="result93"
+         id="feComposite4318" />
+      <feBlend
+         mode="multiply"
+         in2="result93"
+         id="feBlend4320" />
+    </filter>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5777"
+       id="linearGradient5783"
+       x1="0"
+       y1="852.36218"
+       x2="1.5113597e-16"
+       y2="849.89392"
+       gradientUnits="userSpaceOnUse"
+       spreadMethod="reflect" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.5"
+     inkscape:cx="172.8374"
+     inkscape:cy="202.3356"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     inkscape:window-width="1258"
+     inkscape:window-height="990"
+     inkscape:window-x="2533"
+     inkscape:window-y="26"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-652.36216)">
+    <rect
+       style="opacity:1;fill:#144626;fill-opacity:1;stroke:none;stroke-width:31;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4136"
+       width="400"
+       height="400"
+       x="0"
+       y="651.88416" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot4140"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:125%;font-family:'Courier 10 Pitch';-inkscape-font-specification:'Courier 10 Pitch';text-align:center;letter-spacing:1.44000006px;word-spacing:0px;text-anchor:middle;fill:#54ffe0;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;filter:url(#filter4300);"
+       transform="translate(-0.01749309,659.80216)"><flowRegion
+         id="flowRegion4142"><rect
+           id="rect4144"
+           width="400"
+           height="400"
+           x="0"
+           y="0"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Courier 10 Pitch';-inkscape-font-specification:'Courier 10 Pitch';text-align:center;letter-spacing:1.44000006px;text-anchor:middle;fill:#54ffe0;fill-opacity:1;" /></flowRegion><flowPara
+         id="flowPara4146"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80px;line-height:100%;font-family:'Courier 10 Pitch';-inkscape-font-specification:'Courier 10 Pitch';text-align:center;letter-spacing:1.44000006px;text-anchor:middle;fill:#54ffe0;fill-opacity:1;">01010110</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80px;line-height:100%;font-family:'Courier 10 Pitch';-inkscape-font-specification:'Courier 10 Pitch';text-align:center;letter-spacing:1.44000006px;text-anchor:middle;fill:#54ffe0;fill-opacity:1;"
+         id="flowPara4148">01001111</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80px;line-height:100%;font-family:'Courier 10 Pitch';-inkscape-font-specification:'Courier 10 Pitch';text-align:center;letter-spacing:1.44000006px;text-anchor:middle;fill:#54ffe0;fill-opacity:1;"
+         id="flowPara4150">01010100</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80px;line-height:100%;font-family:'Courier 10 Pitch';-inkscape-font-specification:'Courier 10 Pitch';text-align:center;letter-spacing:1.44000006px;text-anchor:middle;fill:#54ffe0;fill-opacity:1;"
+         id="flowPara4154">01000101</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80px;line-height:100%;font-family:'Courier 10 Pitch';-inkscape-font-specification:'Courier 10 Pitch';text-align:center;letter-spacing:1.44000006px;text-anchor:middle;fill:#54ffe0;fill-opacity:1;"
+         id="flowPara4152">00001000</flowPara></flowRoot>    <rect
+       style="opacity:0.236;fill:url(#linearGradient5783);fill-opacity:1;stroke:none;stroke-width:31;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4322"
+       width="400"
+       height="400"
+       x="0"
+       y="652.36218" />
+    <path
+       style="opacity:0.803;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 0 0 L 0 400 L 400 400 L 400 0 L 0 0 z M 28.3125 26.042969 L 369.7832 26.042969 L 371.1875 27.447266 L 371.1875 373.83203 L 369.7832 375.4707 L 28.3125 375.4707 L 26.908203 373.83203 L 26.908203 27.447266 L 28.3125 26.042969 z M 52.886719 51.787109 L 52.886719 349.49219 L 344.97461 349.49219 L 344.97461 51.787109 L 52.886719 51.787109 z M 313.37891 88.767578 L 313.37891 90.171875 C 301.52068 100.31378 292.39134 109.90929 285.99414 118.95898 C 234.97257 187.92393 204.62498 247.6045 194.95117 298.00195 C 194.01499 307.20767 192.2992 311.81055 189.80273 311.81055 C 171.54731 319.14392 161.40533 322.81055 159.37695 322.81055 C 143.61799 282.555 119.74576 262.42773 87.759766 262.42773 L 82.376953 262.42773 L 82.376953 260.78906 L 120.29102 243.70312 C 143.85144 243.70312 161.32666 253.92345 172.7168 274.36328 L 174.12109 274.36328 C 182.07859 248.46243 190.97289 226.46268 200.80273 208.36328 C 216.0936 180.43404 235.83109 151.8806 260.01562 122.70312 C 275.15046 103.97961 292.93907 92.668308 313.37891 88.767578 z "
+       transform="translate(0,652.36216)"
+       id="rect5855" />
+  </g>
+</svg>
