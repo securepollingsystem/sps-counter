@@ -7,7 +7,10 @@ import { verifyScreedSignature } from 'sps-common';
 var lastUpdateOpinionCounts = Date.now(); // when's the last time we checked updated_at in all opinions
 var lastStoreScreed = lastUpdateOpinionCounts + 1000; // when's the last time we stored a new/updated screed
 
-const allowedOrigins = fs.readFileSync('allowedorigins.url', {encoding: 'utf8'}).split(/\\r?\\n/).filter(i => i !== '');
+const allowedOrigins = fs.readFileSync('allowedorigins.url', {encoding: 'utf8'})
+        .replace(/\r\n|\r|\n/g, '\n')  // Normalize all line endings to \n
+        .split('\n')
+        .filter(i => i !== '');
 // file full of URLs that are allowed to load from this API, such as http://localhost:8990
 
 const postGresURI = fs.readFileSync('postgres.uri', {encoding: 'utf8'});
@@ -25,6 +28,7 @@ const main = async () => {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.log('origin:',origin);
         callback(new Error('disallowed by cors'));
       }
     },
@@ -95,6 +99,7 @@ const main = async () => {
       if (typeof dataBuffer === 'object' && dataBuffer !== null) {
         const screedIsSigned = await verifyScreedSignature(dataBuffer);
         if (screedIsSigned) {
+          console.log('verifyScreedSignature:',screedIsSigned);
           await storeScreed(dataBuffer);
           lastStoreScreed = Date.now(); // update time when this last happened
         } else {
