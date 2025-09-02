@@ -2,7 +2,7 @@ import express from 'express';
 import { createPool, sql } from 'slonik';
 import fs from 'fs';
 import cors from 'cors';
-import sodium from 'libsodium-wrappers';
+import verifyScreedSignature from 'sps-common';
 
 var lastUpdateOpinionCounts = Date.now(); // when's the last time we checked updated_at in all opinions
 var lastStoreScreed = lastUpdateOpinionCounts + 1000; // when's the last time we stored a new/updated screed
@@ -18,7 +18,7 @@ const main = async () => {
   const pool = await createPool(postGresURI);
 
   const app = express();
-  const port = 8993;
+  const port = 8994;
 
   app.use(cors({
     origin: (origin, callback) => {
@@ -30,6 +30,8 @@ const main = async () => {
     },
     credentials: true
   }));
+
+  app.use(express.static('dist'));
 
   app.get('/', async (req, res) => {
     const ip = logAccess(req,'');
@@ -187,26 +189,6 @@ function logAccess(req, addlInfo) {
     fs.appendFileSync('scanners.log', logLine + '\n');
   }
   return ip;
-}
-
-async function verifyScreedSignature({ screed, signature, publicKey }) {
-  await sodium.ready;
-  //console.log('verifyScreedSignature:', { screed, signature, publicKey });
-  try {
-    const msgUint8 = sodium.from_string(screed);
-    let sigUint8;
-    try {
-      sigUint8 = sodium.from_base64(signature, sodium.base64_variants.URLSAFE_NO_PADDING); // default variant
-    } catch (e) {
-      console.error('Signature base64 decode failed:', e);
-      return false;
-    }
-    const pubKeyUint8 = sodium.from_hex(publicKey);
-    return sodium.crypto_sign_verify_detached(sigUint8, msgUint8, pubKeyUint8);
-  } catch (e) {
-    console.error('Signature verification failed:', e);
-    return false;
-  }
 }
 
 main();
