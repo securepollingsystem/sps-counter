@@ -38,7 +38,7 @@ const main = async () => {
   app.use('/', async (req, res, next) => {
     const ip = logAccess(req,'');
     var scanner = 0;
-    await Promise.all(['35.203.210.','35.203.211.','162.216.149.','162.216.150.','198.235.24.','205.210.31.','147.185.132.','147.185.133.']
+    await Promise.all(['35.203.210.','35.203.211.','162.216.149.','162.216.150.','198.235.24.','205.210.31.','147.185.132.','147.185.133.','95.214.55.230']
       .filter(d => ip.match(d) != null)
       .map(async function (d) {
         if (ip.match(d)['index'] == 0) {
@@ -195,5 +195,10 @@ function logAccess(req, addlInfo) {
   }
   return ip;
 }
+
+process.on('SIGINT', () => {
+  console.log('Shutting down...');
+  process.exit(0); // This allows Node to exit normally, restoring terminal state
+});
 
 main();
