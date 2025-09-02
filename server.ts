@@ -35,9 +35,7 @@ const main = async () => {
     credentials: true
   }));
 
-  app.use(express.static('dist'));
-
-  app.get('/', async (req, res) => {
+  app.use('/', async (req, res, next) => {
     const ip = logAccess(req,'');
     var scanner = 0;
     await Promise.all(['35.203.210.','35.203.211.','162.216.149.','162.216.150.','198.235.24.','205.210.31.','147.185.132.','147.185.133.']
@@ -48,9 +46,11 @@ const main = async () => {
         }
       }));
     if (scanner == 0) {
-      res.send('Hello, World!');
+      return next();
     }; // otherwise just ignore them
   });
+
+  app.use(express.static('dist'));
 
   app.get('/opinions', async (req, res) => {
     var opinions = 'unpopulated';
