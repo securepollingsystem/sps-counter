@@ -2,7 +2,7 @@ import express from 'express';
 import { createPool, sql } from 'slonik';
 import fs from 'fs';
 import cors from 'cors';
-import verifyScreedSignature from 'sps-common';
+import { verifyScreedSignature } from 'sps-common';
 
 var lastUpdateOpinionCounts = Date.now(); // when's the last time we checked updated_at in all opinions
 var lastStoreScreed = lastUpdateOpinionCounts + 1000; // when's the last time we stored a new/updated screed
