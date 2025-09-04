@@ -74,6 +74,17 @@ const main = async () => {
     return res.json({ message: `Hello! Your IP address is: ${logAccess(req,'')}` });
   });
 
+  app.get('/info', (req, res) => {
+    // ask postgres how many screeds are stored, how many opinions, etc
+    // check globals or logs for server activity stats to report
+    return res.json({ screeds_stored: `screeds stored`,
+                      opinions_stored: `opinions stored`,
+                      searches_today: `searches_today`,
+                      unique_visitors_today: `unique_visitors_today`,
+                      days_active: `days_active`
+    });
+  });
+
   app.use(express.json()); // Add JSON body parsing middleware
   app.post('/upload-screed', express.raw({ type: '*/*', limit: '10mb' }), async (req, res) => {
     let rawData = req.body;

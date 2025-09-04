@@ -5,19 +5,6 @@ import sps_logo from './assets/secure polling.svg';
 import './style.css';
 
 export function App() {
-  const [ipv4, setIpv4] = useState(['unset']);
-  //const ipaddress = fetch('/ipv4').catch((e) => { console.log(e); });
-
-  useEffect(() => {
-    fetch(`http://stemgrid.org:8994/ipv4`)
-      .then((res) => {
-        res.json().then( (j) => {
-          setIpv4( j["message"]);
-        });
-      });
-  }, []);
-
-  console.log('sldkfj', ipv4);
 
   return (
     <div>
@@ -25,7 +12,9 @@ export function App() {
         <img src={sps_logo} alt="Secure Polling System" height="160" width="160" />
       </a>
       <h1>Manage counting and collating data from an SPS central server</h1>
-      <h2>{ipv4}</h2>
+      <GetInfo
+      url="http://stemgrid.org:8994/info"
+      />
       <section>
         <Resource
           title="Learn Preact"
@@ -43,6 +32,41 @@ export function App() {
           href="https://vitejs.dev"
         />
       </section>
+    </div>
+  );
+}
+
+function GetIpv4(props) {
+  const [ipv4, setIpv4] = useState(['unset']);
+  //const ipaddress = fetch('/ipv4').catch((e) => { console.log(e); });
+
+  useEffect(() => {
+    fetch(`http://stemgrid.org:8994/ipv4`)
+      .then((res) => {
+        res.json().then( (j) => {
+          setIpv4( j["message"]);
+        });
+      });
+  }, []);
+  return (<h2>{ipv4}</h2>);
+}
+
+function GetInfo(props) {
+  const [value, setValue] = useState(['unser']);
+
+  useEffect(() => {
+    fetch(props.url)
+      .then((res) => {
+        res.json().then( (j) => {
+          setValue(j);
+        });
+      });
+  }, []);
+  return (
+    <div>
+    {Object.entries(value).map( ([key, keyVal]) => (
+      (<h2>{key}: {keyVal}</h2>)
+    ))}
     </div>
   );
 }
