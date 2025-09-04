@@ -1,15 +1,31 @@
 import { render } from 'preact';
+import { useState, useEffect } from 'preact/hooks';
 
 import sps_logo from './assets/secure polling.svg';
 import './style.css';
 
 export function App() {
+  const [ipv4, setIpv4] = useState(['unset']);
+  //const ipaddress = fetch('/ipv4').catch((e) => { console.log(e); });
+
+  useEffect(() => {
+    fetch(`http://stemgrid.org:8994/ipv4`)
+      .then((res) => {
+        res.json().then( (j) => {
+          setIpv4( j["message"]);
+        });
+      });
+  }, []);
+
+  console.log('sldkfj', ipv4);
+
   return (
     <div>
       <a href="https://securepollingsystem.org" target="_blank">
         <img src={sps_logo} alt="Secure Polling System" height="160" width="160" />
       </a>
       <h1>Manage counting and collating data from an SPS central server</h1>
+      <h2>{ipv4}</h2>
       <section>
         <Resource
           title="Learn Preact"
