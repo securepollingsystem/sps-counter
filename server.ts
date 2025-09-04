@@ -74,7 +74,10 @@ const main = async () => {
     return res.json({ message: `Hello! Your IP address is: ${logAccess(req,'')}` });
   });
 
-  app.get('/info', (req, res) => {
+  app.get('/info', async (req, res) => {
+    const number_of_screeds_obj = await pool.any(sql.unsafe`select count(pubkey) from sps.screeds`);
+    const number_of_screeds = number_of_screeds_obj[0].count;
+    console.log('askldjflasdjf',typeof(number_of_screeds),number_of_screeds);
     // ask postgres how many screeds are stored, how many opinions, etc
     // check globals or logs for server activity stats to report
     return res.json({ screeds_stored: `screeds stored`,
