@@ -35,7 +35,7 @@ const main = async () => {
     credentials: true
   }));
 
-  app.use('/', async (req, res, next) => {
+  app.use(async (req, res, next) => {
     const ip = logAccess(req,'');
     var scanner = 0;
     await Promise.all(['35.203.210.','35.203.211.','162.216.149.','162.216.150.','198.235.24.','205.210.31.','147.185.132.','147.185.133.','95.214.55.230']
@@ -50,7 +50,7 @@ const main = async () => {
     }; // otherwise just ignore them
   });
 
-  app.use(express.static('dist'));
+  app.use(express.static('dist')); // automatically routes / to index.html
 
   app.get('/opinions', async (req, res) => {
     var opinions = 'unpopulated';
