@@ -75,18 +75,20 @@ const main = async () => {
   });
 
   app.get('/info', async (req, res) => {
-    const number_of_screeds_obj = await pool.any(sql.unsafe`select count(pubkey) from sps.screeds`);
-    const number_of_screeds = number_of_screeds_obj[0].count;
-    console.log('askldjflasdjf',typeof(number_of_screeds),number_of_screeds);
     // ask postgres how many screeds are stored, how many opinions, etc
     // check globals or logs for server activity stats to report
-    return res.json({ screeds_stored: `screeds stored`,
-                      opinions_stored: `opinions stored`,
-                      searches_today: `searches_today`,
-                      unique_visitors_today: `unique_visitors_today`,
-                      days_active: `days_active`
+    return res.json({ "screeds stored"  : await sqlGetCount(sql.unsafe`SELECT COUNT(pubkey) FROM sps.screeds`),
+                      "opinions held"   : await sqlGetCount(sql.unsafe`SELECT COUNT(screed_count) FROM sps.opinions WHERE screed_count > 0`),
+                      "searches today"  : `searches_today`,
+                      "unique visitors today": `unique_visitors_today`,
+                      "days active"     : `days_active`
     });
   });
+
+  async function sqlGetCount(sqlCountQuery) {
+    const count_obj = await pool.any(sqlCountQuery);
+    return count_obj[0].count.toString();
+  };
 
   app.use(express.json()); // Add JSON body parsing middleware
   app.post('/upload-screed', express.raw({ type: '*/*', limit: '10mb' }), async (req, res) => {
@@ -185,8 +187,7 @@ const main = async () => {
   function updateOpinionCounts(opinionsToUpdate) {
     lastUpdateOpinionCounts = Date.now(); // record when this last happened
     opinionsToUpdate.map(async (opinion) => { // get a list of ids in sps.opinions and run a for loop (map) on that
-      const screedCountObj = await pool.any(sql.unsafe`SELECT COUNT(*) FROM sps.screedlines WHERE opinion_id = ${opinion.id}`);
-      const screedCount = screedCountObj[0].count; // how many screeds hold this opinion
+      const screedCount = await sqlGetCount(sql.unsafe`SELECT COUNT(*) FROM sps.screedlines WHERE opinion_id = ${opinion.id}`); // how many screeds hold this opinion
       await pool.any(sql.unsafe`UPDATE sps.opinions SET screed_count = ${screedCount}, updated_at = NOW() WHERE id = ${opinion.id}`); // set screed_count and updated_at
     })
     const logLine = `${Date().slice(0,24)} updateOpinionCounts`;
