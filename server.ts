@@ -4,6 +4,36 @@ import fs from 'fs';
 import cors from 'cors';
 import { verifyScreedSignature } from 'sps-common';
 
+var logFileName = 'sps-counter.log';
+
+var logFileLastLine = ''; // we will try to read the last line of the logfile
+try {
+  logFileLastLine = fs.readFileSync(logFileName, {encoding: 'utf8'})
+    .split(/\r?\n/).filter(i => i !== '').at(-1);
+} catch (err) {
+  console.log('Unable to find logfile', logFileName, ', this is normal the first time this server runs');
+}
+
+var totalUptimeFromLogFile = parseFloat(logFileLastLine.split(' ')[7],10);
+if (isNaN(totalUptimeFromLogFile)) {
+  console.log('last line of logfile didn\'t contain total uptime, assuming 0.0');
+  totalUptimeFromLogFile = 0.0;
+}
+console.log('total uptime from log file:',totalUptimeFromLogFile);
+
+let logFile;
+try {
+  logFile = fs.createWriteStream(logFileName, { flags: 'a' }); // open logfile stream for append
+} catch (err) {
+  console.log('Unable to write to logfile', logFileName, ', perhaps I don\'t have permission');
+  console.log('Shutting down...');
+  process.exit(1); // exit with error code 1
+}
+
+var logLevel = 2; // how much info to put in the log file
+var startTime = Date.now(); // store the time this program starts
+var searchesToday = 0; // how many queries have come in
+
 var lastUpdateOpinionCounts = Date.now(); // when's the last time we checked updated_at in all opinions
 var lastStoreScreed = lastUpdateOpinionCounts + 1000; // when's the last time we stored a new/updated screed
 
@@ -53,6 +83,7 @@ const main = async () => {
   app.use(express.static('dist')); // automatically routes / to index.html
 
   app.get('/opinions', async (req, res) => {
+    searchesToday += 1; // increment the count of searches today
     var opinions = 'unpopulated';
     var sqlString = 'unpopulated';
     if ( req.query.subset ) { // '?subset=' returns false here
@@ -79,9 +110,10 @@ const main = async () => {
     // check globals or logs for server activity stats to report
     return res.json({ "screeds stored"  : await sqlGetCount(sql.unsafe`SELECT COUNT(pubkey) FROM sps.screeds`),
                       "opinions held"   : await sqlGetCount(sql.unsafe`SELECT COUNT(screed_count) FROM sps.opinions WHERE screed_count > 0`),
-                      "searches today"  : `searches_today`,
+                      "searches today"  : searchesToday,
                       "unique visitors today": `unique_visitors_today`,
-                      "days active"     : `days_active`
+                      "hours since server started" : uptimePresent().toFixed(1),
+                      "total hours active"     : uptimeTotal().toFixed(1)
     });
   });
 
@@ -205,14 +237,23 @@ function logAccess(req, addlInfo) {
   }
   const logLine = `${Date().slice(0,24)} ${ip} asks for ${req.url} using ${req.headers['user-agent']} ${addlInfo}`;
   console.log(logLine);
-  if (req.headers['user-agent'] && req.headers['user-agent'].includes('Palo Alto Networks')) {
-    fs.appendFileSync('scanners.log', logLine + '\n');
+  if (logLevel > 1) {
+    logFile.write(logLine + '\n');
   }
   return ip;
 }
 
+function uptimePresent() {
+  return ( Date.now() - startTime ) / 3600000.0;
+}
+
+function uptimeTotal() {
+  return uptimePresent() + totalUptimeFromLogFile;
+}
+
 process.on('SIGINT', () => {
   console.log('Shutting down...');
+  logFile.write('sps-server closed after ' + uptimePresent().toFixed(0) + ' hours, total uptime ' + uptimeTotal().toFixed(3) + ' hours\n');
   process.exit(0); // This allows Node to exit normally, restoring terminal state
 });
 
