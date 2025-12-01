@@ -3,8 +3,36 @@ import { createPool, sql } from 'slonik';
 import fs from 'fs';
 import cors from 'cors';
 import { verifyScreedSignature } from 'sps-common';
+import YAML from 'yaml';
+
+async function getConfig(filePath) {
+  const fileContent = fs.readFileSync(filePath, {encoding: 'utf8'});
+  const config = YAML.parse(fileContent);
+  return config;
+}
 
 var logFileName = 'sps-counter.log';
+var allowedOrigins = []; // URLs that are allowed to connect here
+var blockList = []; // IP addresses or prefixes that we simply ignore
+
+getConfig('./sps-demo.yaml').then(config => {
+  console.log(config);
+  if (Object.hasOwn(config, 'logfile')) {
+    logFileName = config.logfile;
+    console.log('logFileName',logFileName);
+  };
+  if (Object.hasOwn(config, 'allowedorigins')) {
+    allowedOrigins = config.allowedorigins;
+    console.log('allowedOrigins',allowedOrigins);
+  };
+  if (Object.hasOwn(config, 'blocklist')) {
+    blockList = config.blocklist;
+    console.log('blockList',blockList);
+  };
+}).catch(err => {
+  console.error('Error reading config:', err);
+});
+
 
 var logFileLastLine = ''; // we will try to read the last line of the logfile
 try {
@@ -37,10 +65,6 @@ var searchesToday = 0; // how many queries have come in
 var lastUpdateOpinionCounts = Date.now(); // when's the last time we checked updated_at in all opinions
 var lastStoreScreed = lastUpdateOpinionCounts + 1000; // when's the last time we stored a new/updated screed
 
-const allowedOrigins = fs.readFileSync('allowedorigins.url', {encoding: 'utf8'})
-        .replace(/\r\n|\r|\n/g, '\n')  // Normalize all line endings to \n
-        .split('\n')
-        .filter(i => i !== '');
 // file full of URLs that are allowed to load from this API, such as http://localhost:8990
 
 const postGresURI = fs.readFileSync('postgres.uri', {encoding: 'utf8'});
@@ -68,7 +92,7 @@ const main = async () => {
   app.use(async (req, res, next) => {
     const ip = logAccess(req,'');
     var scanner = 0;
-    await Promise.all(['35.203.210.','35.203.211.','162.216.149.','162.216.150.','198.235.24.','205.210.31.','147.185.132.','147.185.133.','95.214.55.230']
+    await Promise.all(blockList
       .filter(d => ip.match(d) != null)
       .map(async function (d) {
         if (ip.match(d)['index'] == 0) {
