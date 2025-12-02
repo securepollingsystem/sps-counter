@@ -11,11 +11,35 @@ async function getConfig(filePath) {
   return config;
 }
 
-var logFileName = 'sps-counter.log';
-var allowedOrigins = []; // URLs that are allowed to connect here
-var blockList = []; // IP addresses or prefixes that we simply ignore
+async function readConfig(configObj, varName, defaultVal) {
+  const configVal = configObj[varName]; // undefined if doesn't exist
+  if (['number','string'].includes(typeof(configVal))) {
+    return configVal;
+  } else {
+    return defaultVal;
+  };
+}
 
-getConfig('./sps-demo.yaml').then(config => {
+// TODO: get yaml config file from commandline or environment variable, and speak its name
+var config = await getConfig('./sps-demo.yaml'); // TODO: try/catch this
+var logFileName = await readConfig(config, 'logfile', 'sps-counter.log');
+var allowedOrigins = await readConfig(config, 'allowedOrigins', []); // URLs that are allowed to connect here
+var blockList = await readConfig(config, 'blockList', []); // IP addresses or prefixes that we simply ignore
+var postGresURI = await readConfig(config, 'postGresURI', undefined); // postgresql://[user[:password]@][host[:port]][/database name][?name=value[&...]]
+console.log('postGresURI',postGresURI);
+if (postGresURI === undefined) {
+  const postgresconfig = config['postgres'] // TODO add 'Object' to line 16 and update this from file s
+  console.log('postgresconfig',postgresconfig);
+  postGresURI = 'postgresql://'
+        + await readConfig(postgresconfig, 'user', 'postgres') + ':'
+        + await readConfig(postgresconfig, 'password', 'postgres') + '@'
+        + await readConfig(postgresconfig, 'address', 'localhost') + ':'
+        + await readConfig(postgresconfig, 'port', 5432) + '/'
+        + await readConfig(postgresconfig, 'database', 'postgres');
+}
+console.log('postGresURI',postGresURI);
+
+/*getConfig('./sps-demo.yaml').then(config => {
   console.log(config);
   if (Object.hasOwn(config, 'logfile')) {
     logFileName = config.logfile;
@@ -31,8 +55,7 @@ getConfig('./sps-demo.yaml').then(config => {
   };
 }).catch(err => {
   console.error('Error reading config:', err);
-});
-
+});*/
 
 var logFileLastLine = ''; // we will try to read the last line of the logfile
 try {
@@ -65,17 +88,11 @@ var searchesToday = 0; // how many queries have come in
 var lastUpdateOpinionCounts = Date.now(); // when's the last time we checked updated_at in all opinions
 var lastStoreScreed = lastUpdateOpinionCounts + 1000; // when's the last time we stored a new/updated screed
 
-// file full of URLs that are allowed to load from this API, such as http://localhost:8990
-
-const postGresURI = fs.readFileSync('postgres.uri', {encoding: 'utf8'});
-// postgresql://user:password@localhost:5432/spsdata
-// postgresql://[user[:password]@][host[:port]][/database name][?name=value[&...]]
-
 const main = async () => {
   const pool = await createPool(postGresURI);
 
   const app = express();
-  const port = 8994;
+  const port = 8994; // TODO: use YAML config file for this
 
   app.use(cors({
     origin: (origin, callback) => {
