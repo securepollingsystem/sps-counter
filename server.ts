@@ -13,7 +13,7 @@ async function getConfig(filePath) {
 
 async function readConfig(configObj, varName, defaultVal) {
   const configVal = configObj[varName]; // undefined if doesn't exist
-  if (['number','string'].includes(typeof(configVal))) {
+  if (['number','string','object'].includes(typeof(configVal))) {
     return configVal;
   } else {
     return defaultVal;
@@ -21,15 +21,24 @@ async function readConfig(configObj, varName, defaultVal) {
 }
 
 // TODO: get yaml config file from commandline or environment variable, and speak its name
-var config = await getConfig('./sps-demo.yaml'); // TODO: try/catch this
+var config;
+try {
+  config = await getConfig('./sps-demo.yaml');
+} catch (err) {
+  console.error('Error reading config ./sps-demo.yaml', err);
+}
 var logFileName = await readConfig(config, 'logfile', 'sps-counter.log');
 var allowedOrigins = await readConfig(config, 'allowedOrigins', []); // URLs that are allowed to connect here
 var blockList = await readConfig(config, 'blockList', []); // IP addresses or prefixes that we simply ignore
 var postGresURI = await readConfig(config, 'postGresURI', undefined); // postgresql://[user[:password]@][host[:port]][/database name][?name=value[&...]]
 console.log('postGresURI',postGresURI);
 if (postGresURI === undefined) {
-  const postgresconfig = config['postgres'] // TODO add 'Object' to line 16 and update this from file s
-  console.log('postgresconfig',postgresconfig);
+  const postgresconfig = await readConfig(config, 'postgres', undefined);
+  console.log('postgresconfig' ,postgresconfig );
+  if (postgresconfig === undefined) {
+    console.log('postgres URI is not defined in configuration file')
+    process.exit(9);
+  }
   postGresURI = 'postgresql://'
         + await readConfig(postgresconfig, 'user', 'postgres') + ':'
         + await readConfig(postgresconfig, 'password', 'postgres') + '@'
@@ -38,24 +47,6 @@ if (postGresURI === undefined) {
         + await readConfig(postgresconfig, 'database', 'postgres');
 }
 console.log('postGresURI',postGresURI);
-
-/*getConfig('./sps-demo.yaml').then(config => {
-  console.log(config);
-  if (Object.hasOwn(config, 'logfile')) {
-    logFileName = config.logfile;
-    console.log('logFileName',logFileName);
-  };
-  if (Object.hasOwn(config, 'allowedorigins')) {
-    allowedOrigins = config.allowedorigins;
-    console.log('allowedOrigins',allowedOrigins);
-  };
-  if (Object.hasOwn(config, 'blocklist')) {
-    blockList = config.blocklist;
-    console.log('blockList',blockList);
-  };
-}).catch(err => {
-  console.error('Error reading config:', err);
-});*/
 
 var logFileLastLine = ''; // we will try to read the last line of the logfile
 try {
