@@ -5,12 +5,6 @@ import cors from 'cors';
 import { verifyScreedSignature } from 'sps-common';
 import YAML from 'yaml';
 
-async function getConfig(filePath) {
-  const fileContent = fs.readFileSync(filePath, {encoding: 'utf8'});
-  const config = YAML.parse(fileContent);
-  return config;
-}
-
 async function readConfig(configObj, varName, defaultVal) {
   const configVal = configObj[varName]; // undefined if doesn't exist
   if (['number','string','object'].includes(typeof(configVal))) {
@@ -23,7 +17,7 @@ async function readConfig(configObj, varName, defaultVal) {
 // TODO: get yaml config file from commandline or environment variable, and speak its name
 var config;
 try {
-  config = await getConfig('./sps-demo.yaml');
+  config = await YAML.parse(fs.readFileSync('./sps-demo.yaml', {encoding: 'utf8'}));
 } catch (err) {
   console.error('Error reading config ./sps-demo.yaml', err);
 }
