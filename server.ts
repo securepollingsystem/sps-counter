@@ -5,11 +5,13 @@ import cors from 'cors';
 import { verifyScreedSignature } from 'sps-common';
 import YAML from 'yaml';
 
-async function readConfig(configObj, varName, defaultVal) {
-  const configVal = configObj[varName]; // undefined if doesn't exist
+async function readConfig(configObj, varName, defaultVal) { // case-insensitive varName search
+  const objVarName = Object.keys(configObj).find(key => key.toLowerCase() === varName.toLowerCase());
+  const configVal = configObj[objVarName]; // undefined if doesn't exist
   if (['number','string','object'].includes(typeof(configVal))) {
     return configVal;
   } else {
+    console.log('didnt find',varName,'using default',defaultVal);
     return defaultVal;
   };
 }
@@ -23,12 +25,13 @@ try {
 }
 var logFileName = await readConfig(config, 'logfile', 'sps-counter.log');
 var allowedOrigins = await readConfig(config, 'allowedOrigins', []); // URLs that are allowed to connect here
+//console.log('allowedOrigins',allowedOrigins);
 var blockList = await readConfig(config, 'blockList', []); // IP addresses or prefixes that we simply ignore
+//console.log('blockList',blockList);
+var serverPort = await readConfig(config, 'serverPort', 8994); // port on which this server listens (default 8994)
 var postGresURI = await readConfig(config, 'postGresURI', undefined); // postgresql://[user[:password]@][host[:port]][/database name][?name=value[&...]]
-console.log('postGresURI',postGresURI);
 if (postGresURI === undefined) {
   const postgresconfig = await readConfig(config, 'postgres', undefined);
-  console.log('postgresconfig' ,postgresconfig );
   if (postgresconfig === undefined) {
     console.log('postgres URI is not defined in configuration file')
     process.exit(9);
@@ -40,7 +43,6 @@ if (postGresURI === undefined) {
         + await readConfig(postgresconfig, 'port', 5432) + '/'
         + await readConfig(postgresconfig, 'database', 'postgres');
 }
-console.log('postGresURI',postGresURI);
 
 var logFileLastLine = ''; // we will try to read the last line of the logfile
 try {
@@ -77,7 +79,6 @@ const main = async () => {
   const pool = await createPool(postGresURI);
 
   const app = express();
-  const port = 8994; // TODO: use YAML config file for this
 
   app.use(cors({
     origin: (origin, callback) => {
@@ -85,7 +86,7 @@ const main = async () => {
         callback(null, true);
       } else {
         console.log('origin:',origin);
-        callback(new Error('disallowed by cors'));
+        callback(new Error('server.ts: disallowed by cors'));
       }
     },
     credentials: true
@@ -184,8 +185,8 @@ const main = async () => {
     res.json({ status: 'success', bytesReceived: dataBuffer.length });
   });
 
-  app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
+  app.listen(serverPort, () => {
+    console.log(`Example app listening on port ${serverPort}`)
   });
 
   async function storeScreed(signedScreedObject) {
