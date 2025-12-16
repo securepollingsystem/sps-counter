@@ -48,6 +48,8 @@ if (postGresURI === undefined) {
         + await readConfig(postgresconfig, 'database', 'postgres');
 }
 
+// TODO: use postgres to store our uptime
+// TODO: use log4js instead of this
 var logFileLastLine = ''; // we will try to read the last line of the logfile
 try {
   logFileLastLine = fs.readFileSync(logFileName, {encoding: 'utf8'})
@@ -80,7 +82,14 @@ var lastUpdateOpinionCounts = Date.now(); // when's the last time we checked upd
 var lastStoreScreed = lastUpdateOpinionCounts + 1000; // when's the last time we stored a new/updated screed
 
 const main = async () => {
-  const pool = await createPool(postGresURI);
+  var pool;
+  try {
+    pool = await createPool(postGresURI);
+  } catch (err) {
+    console.log('Unable to connect to postgres using URI', postGresURI.replace(/postgresql:\/\/.*@/,'postgresql://[user]:[password]@'), ', perhaps I don\'t have permission');
+    console.log('Shutting down...');
+    process.exit(2); // exit with error code 2
+  }
 
   const app = express();
 
