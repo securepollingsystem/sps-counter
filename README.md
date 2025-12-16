@@ -9,6 +9,8 @@
 -   Vite serves from public/ for static files that bypass the build process, while it serves from src/ for source files that are processed, bundled, and optimized during the build.
 -   index.html is the entry point and it imports "/src/index.tsx" which is a processed and bundled version of the actual file src/index.tsx
 -   /src/style.css styles the whole thing, served as /src/style.css which just quotes it escaped inside of const __vite__css which is imported into index.tsx
+-   default YAML config filename is server.ts.yaml in the same place as server.ts
+-   if this is run in a docker container, a config file can be sent using docker run --mount type=bind,source=$(pwd)/config.yml,target=/app/config.yml myapp
 
 ## Blinding
 -   blinding using Schnorr is possible using libsodium but Schnorr requires a multi-step signing process which forbids concurrency, meaning the voter and registrar have to dance back and forth together before registrar can start dancing with someone else, lest the dancees collaborate to create an unearned signature https://nickler.ninja/slides/2018-bob.pdf see also https://github.com/jedisct1/libsodium/issues/831

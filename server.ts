@@ -16,12 +16,16 @@ async function readConfig(configObj, varName, defaultVal) { // case-insensitive 
   };
 }
 
-// TODO: get yaml config file from commandline or environment variable, and speak its name
+var configFileName = process.env.SPS_CONFIG_FILE; // check environment for SPS_CONFIG_FILE
+if (configFileName === undefined) {
+  configFileName = import.meta.url.replace('file://','') + '.yaml'; // default config filename is this file .yaml
+}
+
 var config;
 try {
-  config = await YAML.parse(fs.readFileSync('./sps-demo.yaml', {encoding: 'utf8'}));
+  config = await YAML.parse(fs.readFileSync(configFileName, {encoding: 'utf8'}));
 } catch (err) {
-  console.error('Error reading config ./sps-demo.yaml', err);
+  console.error('Error reading config file ' + configFileName, err);
 }
 var logFileName = await readConfig(config, 'logfile', 'sps-counter.log');
 var allowedOrigins = await readConfig(config, 'allowedOrigins', []); // URLs that are allowed to connect here
