@@ -12,12 +12,7 @@ export async function readConfig(configObj: any, varName: string, defaultVal: an
   }
 }
 
-export async function loadConfig() {
-  let configFileName = process.env.SPS_CONFIG_FILE; // check environment for SPS_CONFIG_FILE
-  if (configFileName === undefined) {
-    configFileName = import.meta.url.replace('file://','') + '.yaml'; // default config filename is this file .yaml
-  }
-
+export async function loadConfig(configFileName) {
   let config: any = {};
   try {
     config = YAML.parse(fs.readFileSync(configFileName, {encoding: 'utf8'}));

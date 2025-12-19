@@ -3,7 +3,6 @@ import { createPool, sql } from 'slonik';
 import fs from 'fs';
 import cors from 'cors';
 import { verifyScreedSignature } from 'sps-common';
-import YAML from 'yaml';
 import { loadConfig } from './server/config';
 
 var configFileName = process.env.SPS_CONFIG_FILE; // check environment for SPS_CONFIG_FILE
@@ -11,7 +10,7 @@ if (configFileName === undefined) {
   configFileName = import.meta.url.replace('file://','') + '.yaml'; // default config filename is this file .yaml
 }
 
-var { config, logFileName, allowedOrigins, blockList, serverPort, postGresURI } = await loadConfig();
+var { config, logFileName, allowedOrigins, blockList, serverPort, postGresURI } = await loadConfig(configFileName);
 
 // TODO: use postgres to store our uptime
 // TODO: use log4js instead of this
