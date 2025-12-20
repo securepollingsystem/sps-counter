@@ -1,7 +1,7 @@
 import fs from 'fs';
 import YAML from 'yaml';
 
-export async function readConfig(configObj: any, varName: string, defaultVal: any) {
+export async function readConfig(configObj: object, varName: string, defaultVal: any) {
   const objVarName = Object.keys(configObj || {}).find(key => key.toLowerCase() === varName.toLowerCase());
   const configVal = objVarName ? configObj[objVarName] : undefined;
   if (['number','string','object'].includes(typeof(configVal))) {
@@ -13,7 +13,7 @@ export async function readConfig(configObj: any, varName: string, defaultVal: an
 }
 
 export async function loadConfig(configFileName) {
-  let config: any = {};
+  let config: object = {};
   try {
     config = YAML.parse(fs.readFileSync(configFileName, {encoding: 'utf8'}));
   } catch (err) {
