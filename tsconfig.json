@@ -6,8 +6,12 @@
     "noEmit": true,
     "allowJs": true,
     "checkJs": true,
-
-    /* Preact Config */
+    "types": ["node", "vite/client"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "../node_modules/@types",
+      "../../node_modules/@types"
+    ],
     "jsx": "react-jsx",
     "jsxImportSource": "preact",
     "skipLibCheck": true,
@@ -16,5 +20,5 @@
       "react-dom": ["./node_modules/preact/compat/"]
     }
   },
-  "include": ["node_modules/vite/client.d.ts", "**/*"]
+  "include": ["server.ts", "vite.config.ts"]
 }

@@ -5,7 +5,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "serve": "tsx watch server.ts || stty sane"
+    "serve": "tsx watch server.ts || stty sane",
+    "lintfix": "eslint '**/*.{ts,tsx}' --fix",
+    "lint": "eslint '**/*.{ts,tsx}'"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -18,9 +20,13 @@
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.9.3",
-    "eslint": "^9.34.0",
+    "@types/node": "^25.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.50.0",
+    "@typescript-eslint/parser": "^8.50.0",
+    "eslint": "^9.39.2",
     "eslint-config-preact": "^2.0.0",
-    "typescript": "^5.9.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.50.0",
     "vite": "^6.0.4"
   },
   "eslintConfig": {
