@@ -5,16 +5,16 @@ import cors from 'cors';
 import { verifyScreedSignature } from 'sps-common';
 import { loadConfig } from './server/config';
 
-var configFileName = process.env.SPS_CONFIG_FILE; // check environment for SPS_CONFIG_FILE
+let configFileName = process.env.SPS_CONFIG_FILE; // check environment for SPS_CONFIG_FILE
 if (configFileName === undefined) {
   configFileName = import.meta.url.replace('file://','') + '.yaml'; // default config filename is this file .yaml
 }
 
-var { config, logFileName, allowedOrigins, blockList, serverPort, postGresURI } = await loadConfig(configFileName);
+const { config, logFileName, allowedOrigins, blockList, serverPort, postGresURI } = await loadConfig(configFileName);
 
 // TODO: use postgres to store our uptime
 // TODO: use log4js instead of this
-var logFileLastLine = ''; // we will try to read the last line of the logfile
+let logFileLastLine = ''; // we will try to read the last line of the logfile
 try {
   logFileLastLine = fs.readFileSync(logFileName, {encoding: 'utf8'})
     .split(/\r?\n/).filter(i => i !== '').at(-1);
@@ -22,7 +22,7 @@ try {
   console.log('Unable to find logfile', logFileName, ', this is normal the first time this server runs');
 }
 
-var totalUptimeFromLogFile = parseFloat(logFileLastLine.split(' ')[7],10);
+let totalUptimeFromLogFile = parseFloat(logFileLastLine.split(' ')[7],10);
 if (isNaN(totalUptimeFromLogFile)) {
   console.log('last line of logfile didn\'t contain total uptime, assuming 0.0');
   totalUptimeFromLogFile = 0.0;
@@ -38,15 +38,15 @@ try {
   process.exit(1); // exit with error code 1
 }
 
-var logLevel = 2; // how much info to put in the log file
-var startTime = Date.now(); // store the time this program starts
-var searchesToday = 0; // how many queries have come in
+const logLevel = 2; // how much info to put in the log file
+const startTime = Date.now(); // store the time this program starts
+let searchesToday = 0; // how many queries have come in
 
-var lastUpdateOpinionCounts = Date.now(); // when's the last time we checked updated_at in all opinions
-var lastStoreScreed = lastUpdateOpinionCounts + 1000; // when's the last time we stored a new/updated screed
+let lastUpdateOpinionCounts = Date.now(); // when's the last time we checked updated_at in all opinions
+let lastStoreScreed = lastUpdateOpinionCounts + 1000; // when's the last time we stored a new/updated screed
 
 const main = async () => {
-  var pool;
+  let pool;
   try {
     pool = await createPool(postGresURI);
   } catch (err) {
@@ -71,7 +71,7 @@ const main = async () => {
 
   app.use(async (req, res, next) => {
     const ip = logAccess(req,'');
-    var scanner = 0;
+    let scanner = 0;
     await Promise.all(blockList
       .filter(d => ip.match(d) != null)
       .map(async function (d) {
@@ -88,8 +88,8 @@ const main = async () => {
 
   app.get('/opinions', async (req, res) => {
     searchesToday += 1; // increment the count of searches today
-    var opinions = 'unpopulated';
-    var sqlString = 'unpopulated';
+    let opinions = 'unpopulated';
+    let sqlString = 'unpopulated';
     if ( req.query.subset ) { // '?subset=' returns false here
       const search_value = '%' + decodeURIComponent(req.query.subset) + '%'
       sqlString = sql.unsafe`SELECT * FROM sps.opinions WHERE OPINION ILIKE ${search_value} ORDER BY screed_count DESC`;
@@ -128,8 +128,8 @@ const main = async () => {
 
   app.use(express.json()); // Add JSON body parsing middleware
   app.post('/upload-screed', express.raw({ type: '*/*', limit: '10mb' }), async (req, res) => {
-    let rawData = req.body;
-    let encoding = req.headers['content-encoding'];
+    const rawData = req.body;
+    const encoding = req.headers['content-encoding'];
     let dataBuffer;
     if (encoding === 'gzip') {
       const { gunzipSync } = await import('zlib');
@@ -191,7 +191,7 @@ const main = async () => {
       }
       const sqlline = sql.unsafe`SELECT id FROM sps.opinions WHERE opinion = ${opinionText}`;
       // console.log('opinionText:',opinionText,'sqlline:', sqlline.text, sqlline.values);
-      let opinionRow = await pool.maybeOne(sqlline);
+      const opinionRow = await pool.maybeOne(sqlline);
       let opinionId;
       if (!opinionRow) {
         const insertResult = await pool.one(sql.unsafe`INSERT INTO sps.opinions (opinion, screed_count) VALUES (${opinionText}, 1) RETURNING id`);
@@ -235,7 +235,7 @@ const main = async () => {
 
 function logAccess(req, addlInfo) {
   //const ip = req.ip; // https://stackoverflow.com/questions/29411551/express-js-req-ip-is-returning-ffff127-0-0-1
-  var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress; // https://stackoverflow.com/a/39473073
+  let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress; // https://stackoverflow.com/a/39473073
   if (ip.substr(0, 7) == "::ffff:") {
     ip = ip.substr(7)
   }
