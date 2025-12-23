@@ -1,10 +1,12 @@
 import fs from 'fs';
 import YAML from 'yaml';
 
-export async function readConfig(configObj: object, varName: string, defaultVal: any) {
+async function readConfig(configObj: object, varName: string, defaultVal: string);
+async function readConfig(configObj: object, varName: string, defaultVal: number);
+async function readConfig(configObj: object, varName: string, defaultVal: object) {
   const objVarName = Object.keys(configObj || {}).find(key => key.toLowerCase() === varName.toLowerCase());
   const configVal = objVarName ? configObj[objVarName] : undefined;
-  if (['number','string','object'].includes(typeof(configVal))) {
+  if (typeof(defaultVal) === typeof(configVal)) {
     return configVal;
   } else {
     console.log('didnt find',varName,'using default',defaultVal);
@@ -24,10 +26,10 @@ export async function loadConfig(configFileName) {
   const allowedOrigins = await readConfig(config, 'allowedOrigins', []); // URLs that are allowed to connect here
   const blockList = await readConfig(config, 'blockList', []); // IP addresses or prefixes that we simply ignore
   const serverPort = await readConfig(config, 'serverPort', 8994); // port on which this server listens (default 8994)
-  let postGresURI = await readConfig(config, 'postGresURI', undefined); // postgresql://[user[:password]@][host[:port]][/database name][?name=value[&...]]
-  if (postGresURI === undefined) {
-    const postgresconfig = await readConfig(config, 'postgres', undefined);
-    if (postgresconfig === undefined) {
+  let postGresURI = await readConfig(config, 'postGresURI', 'nopostgresuri'); // postgresql://[user[:password]@][host[:port]][/database name][?name=value[&...]]
+  if (postGresURI === 'nopostgresuri') {
+    const postgresconfig = await readConfig(config, 'postgres', []);
+    if (postgresconfig == []) {
       console.log('postgres URI is not defined in configuration file')
       process.exit(9);
     }
