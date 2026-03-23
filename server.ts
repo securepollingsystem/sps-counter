@@ -10,7 +10,7 @@ if (configFileName === undefined) {
   configFileName = import.meta.url.replace('file://','') + '.yaml'; // default config filename is this file .yaml
 }
 
-const { config, logFileName, allowedOrigins, blockList, serverPort, postGresURI } = await loadConfig(configFileName);
+const { logFileName, allowedOrigins, blockList, serverPort, postGresURI } = await loadConfig(configFileName);
 
 // TODO: use postgres to store our uptime
 // TODO: use log4js instead of this
@@ -19,6 +19,7 @@ try {
   logFileLastLine = fs.readFileSync(logFileName, {encoding: 'utf8'})
     .split(/\r?\n/).filter(i => i !== '').at(-1);
 } catch (err) {
+  console.error("Error occurred:", err.message);
   console.log('Unable to find logfile', logFileName, ', this is normal the first time this server runs');
 }
 
@@ -33,6 +34,7 @@ let logFile;
 try {
   logFile = fs.createWriteStream(logFileName, { flags: 'a' }); // open logfile stream for append
 } catch (err) {
+  console.error("Error occurred:", err.message);
   console.log('Unable to write to logfile', logFileName, ', perhaps I don\'t have permission');
   console.log('Shutting down...');
   process.exit(1); // exit with error code 1
@@ -50,6 +52,7 @@ const main = async () => {
   try {
     pool = await createPool(postGresURI);
   } catch (err) {
+    console.error("Error occurred:", err.message);
     console.log('Unable to connect to postgres using URI', postGresURI.replace(/postgresql:\/\/.*@/,'postgresql://[user]:[password]@'), ', perhaps I don\'t have permission');
     console.log('Shutting down...');
     process.exit(2); // exit with error code 2
@@ -99,7 +102,6 @@ const main = async () => {
       opinions = await pool.any(sql.unsafe`SELECT * FROM sps.opinions ORDER BY screed_count DESC`);
       logAccess(req,'no subset, returned this many items: '+opinions.length);
     }
-    const stringResponse = JSON.stringify(opinions); // , (key, value) => typeof value === 'bigint' ? value.toString() : value);  // https://github.com/GoogleChromeLabs/jsbi/issues/30
     res.setHeader('Content-Type', 'application/json'); // https://stackoverflow.com/questions/19696240/proper-way-to-return-json-using-node-or-express
     res.json(opinions);
   });
@@ -137,6 +139,7 @@ const main = async () => {
         dataBuffer = gunzipSync(rawData);
         logAccess(req, 'Received gzip upload');
       } catch (err) {
+        console.error("Error occurred:", err.message);
         logAccess(req, 'Failed to decompress gzip upload');
         return res.status(400).json({ error: 'Invalid gzip data' });
       }
@@ -230,7 +233,7 @@ const main = async () => {
     console.log(logLine);
   }
 
-  const maybeUpdater = setInterval(maybeUpdateOpinionCounts, 1000);
+  setInterval(maybeUpdateOpinionCounts, 1000);
 };
 
 function logAccess(req, addlInfo) {

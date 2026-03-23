@@ -41,5 +41,5 @@ export async function loadConfig(configFileName) {
           + await readConfig(postgresconfig, 'database', 'postgres');
   }
 
-  return { config, logFileName, allowedOrigins, blockList, serverPort, postGresURI };
+  return { logFileName, allowedOrigins, blockList, serverPort, postGresURI };
 }
