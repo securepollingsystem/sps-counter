@@ -10,7 +10,16 @@ if (configFileName === undefined) {
   configFileName = import.meta.url.replace('file://','') + '.yaml'; // default config filename is this file .yaml
 }
 
-const { logFileName, allowedOrigins, blockList, serverPort, postGresURI } = await loadConfig(configFileName);
+const { serverFunction, logFileName, allowedOrigins, blockList, serverPort, postGresURI } = await loadConfig(configFileName);
+
+if (serverFunction === 'central-server') {
+  console.log('serverFunction === central-server');
+} else if (serverFunction === 'counter') {
+  console.log('serverFunction === counter');
+} else {
+  console.error('Error: serverFunction must be "central-server" or "counter"');
+  process.exit(1); // exit with error code 9
+}
 
 // TODO: use postgres to store our uptime
 // TODO: use log4js instead of this

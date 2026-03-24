@@ -22,6 +22,7 @@ export async function loadConfig(configFileName) {
     console.error('Error reading config file ' + configFileName, err);
   }
 
+  const serverFunction = await readConfig(config, 'serverFunction', 'undefined'); // must be 'central-server' or 'counter'
   const logFileName = await readConfig(config, 'logfile', 'sps-counter.log');
   const allowedOrigins = await readConfig(config, 'allowedOrigins', []); // URLs that are allowed to connect here
   const blockList = await readConfig(config, 'blockList', []); // IP addresses or prefixes that we simply ignore
@@ -41,5 +42,5 @@ export async function loadConfig(configFileName) {
           + await readConfig(postgresconfig, 'database', 'postgres');
   }
 
-  return { logFileName, allowedOrigins, blockList, serverPort, postGresURI };
+  return { serverFunction, logFileName, allowedOrigins, blockList, serverPort, postGresURI };
 }
