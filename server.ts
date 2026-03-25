@@ -5,6 +5,7 @@ import fs from 'fs';
 import cors from 'cors';
 import { verifyScreedSignature } from 'sps-common';
 import { loadConfig } from './server/config';
+import { setupOpinionsRoute, storeScreed, maybeUpdateOpinionCounts } from './counter.js';
 
 let configFileName = process.env.SPS_CONFIG_FILE; // check environment for SPS_CONFIG_FILE
 if (configFileName === undefined) {
@@ -99,22 +100,7 @@ const main = async () => {
 
   app.use(express.static('dist')); // automatically routes / to index.html
 
-  app.get('/opinions', async (req, res) => {
-    searchesToday += 1; // increment the count of searches today
-    let opinions = 'unpopulated';
-    let sqlString = 'unpopulated';
-    if ( req.query.subset ) { // '?subset=' returns false here
-      const search_value = '%' + decodeURIComponent(req.query.subset) + '%'
-      sqlString = sql.unsafe`SELECT * FROM sps.opinions WHERE OPINION ILIKE ${search_value} ORDER BY screed_count DESC`;
-      opinions = await pool.any(sqlString);
-      logAccess(req,'Safe subset query: '+sqlString.values+' returned this many items: '+opinions.length);
-    } else {
-      opinions = await pool.any(sql.unsafe`SELECT * FROM sps.opinions ORDER BY screed_count DESC`);
-      logAccess(req,'no subset, returned this many items: '+opinions.length);
-    }
-    res.setHeader('Content-Type', 'application/json'); // https://stackoverflow.com/questions/19696240/proper-way-to-return-json-using-node-or-express
-    res.json(opinions);
-  });
+  setupOpinionsRoute(app, pool, logAccess, { searchesToday });
 
   app.get('/ipv4', (req, res) => {
     console.log(req);
@@ -165,7 +151,7 @@ const main = async () => {
         const screedIsSigned = await verifyScreedSignature(dataBuffer);
         if (screedIsSigned) {
           console.log('verifyScreedSignature:',screedIsSigned);
-          await storeScreed(dataBuffer);
+          await storeScreed(pool, dataBuffer);
           lastStoreScreed = Date.now(); // update time when this last happened
         } else {
           console.log('verifyScreedSignature failed:', screedIsSigned);
@@ -179,71 +165,7 @@ const main = async () => {
     console.log(`Example app listening on port ${serverPort}`)
   });
 
-  async function storeScreed(signedScreedObject) {
-    const sqlString = sql.unsafe`
-      INSERT INTO sps.screeds (pubkey, signer_key, sig_expires, modified)
-      VALUES (
-        ${signedScreedObject.publicKey},
-        ${'signer_key'},
-        TO_TIMESTAMP(${1758394589}),
-        NOW()
-      )
-      ON CONFLICT (pubkey)
-      DO UPDATE SET modified = NOW()
-    `; // EXCLUDED.signer_key means the value that was attempted to be inserted into signer_key
-    const response = await pool.any(sqlString);
-
-    // Delete any existing screedlines for this screed_key and then we will repopulate them
-    await pool.any(sql.unsafe`DELETE FROM sps.screedlines WHERE screed_key = ${signedScreedObject.publicKey}`);
-
-    // For each item in signedScreedObject.screed, check if opinion exists and if not, insert it.  Grab its id.
-    for (const opinionText of JSON.parse(signedScreedObject.screed)) {
-      if (typeof opinionText !== 'string' || !opinionText.trim()) {
-        console.log('Skipping invalid opinion type:', typeof(opinionText), 'value:', opinionText);
-        continue;
-      }
-      const sqlline = sql.unsafe`SELECT id FROM sps.opinions WHERE opinion = ${opinionText}`;
-      // console.log('opinionText:',opinionText,'sqlline:', sqlline.text, sqlline.values);
-      const opinionRow = await pool.maybeOne(sqlline);
-      let opinionId;
-      if (!opinionRow) {
-        const insertResult = await pool.one(sql.unsafe`INSERT INTO sps.opinions (opinion, screed_count) VALUES (${opinionText}, 1) RETURNING id`);
-        if (!insertResult || !insertResult.id) {
-          console.error('Failed to insert opinion:', opinionText, 'insertResult:', insertResult);
-          continue;
-        }
-        opinionId = insertResult.id;
-      } else {
-        opinionId = opinionRow.id;
-      }
-      //console.log('Inserting into screedlines:', { screed_key: signedScreedObject.publicKey, opinion_id: opinionId });
-      await pool.any(sql.unsafe`INSERT INTO sps.screedlines (screed_key, opinion_id) VALUES (${signedScreedObject.publicKey}, ${opinionId})`);
-    }
-    return response;
-  };
-
-  async function maybeUpdateOpinionCounts() { // run updateOpinionCounts if needed
-    if (lastUpdateOpinionCounts < lastStoreScreed) { // compare the last time updateOpinionCounts ran to the most recent storeScreed time
-      const newestScreedTimeObj = await pool.any(sql.unsafe`SELECT MAX(modified) FROM sps.screeds`); // get timestamp of newest record in sps.screeds modified
-      const newestScreedTime = newestScreedTimeObj[0].max; // just the unixtime value (in milliseconds)
-      const opinionsToUpdate = await pool.any(sql.unsafe`SELECT id FROM sps.opinions WHERE updated_at < TO_TIMESTAMP(${newestScreedTime})`); // find out if any sps.opinions were updated_at older value than newest screed
-      if (opinionsToUpdate.length > 0) { // if there are opinions that needs to be updated
-        updateOpinionCounts(opinionsToUpdate);
-      }
-    }
-  };
-
-  function updateOpinionCounts(opinionsToUpdate) {
-    lastUpdateOpinionCounts = Date.now(); // record when this last happened
-    opinionsToUpdate.map(async (opinion) => { // get a list of ids in sps.opinions and run a for loop (map) on that
-      const screedCount = await sqlGetCount(sql.unsafe`SELECT COUNT(*) FROM sps.screedlines WHERE opinion_id = ${opinion.id}`); // how many screeds hold this opinion
-      await pool.any(sql.unsafe`UPDATE sps.opinions SET screed_count = ${screedCount}, updated_at = NOW() WHERE id = ${opinion.id}`); // set screed_count and updated_at
-    })
-    const logLine = `${Date().slice(0,24)} updateOpinionCounts`;
-    console.log(logLine);
-  }
-
-  setInterval(maybeUpdateOpinionCounts, 1000);
+  setInterval(async () => { lastUpdateOpinionCounts = await maybeUpdateOpinionCounts(pool, lastUpdateOpinionCounts, lastStoreScreed); }, 1000);
 };
 
 function logAccess(req, addlInfo) {

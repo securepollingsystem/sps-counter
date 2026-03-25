@@ -12,7 +12,7 @@ export function App() {
       </a>
       <h1>Manage counting and collating data from an SPS central server</h1>
       <GetInfo
-      url={window.location.href+"info"}
+      url={"http://stemgrid.org:8994/info" /* window.location.href+"info" */}
       />
       <section>
         <Resource
