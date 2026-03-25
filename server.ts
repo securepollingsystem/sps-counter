@@ -1,3 +1,4 @@
+'use strict';
 import express from 'express';
 import { createPool, sql } from 'slonik';
 import fs from 'fs';
@@ -17,7 +18,7 @@ if (serverFunction === 'central-server') {
 } else if (serverFunction === 'counter') {
   console.log('serverFunction === counter');
 } else {
-  console.error('Error: serverFunction must be "central-server" or "counter"');
+  console.error('Error: serverFunction must be "central-server" or "counter", got ', typeof(serverFunction), serverFunction);
   process.exit(1); // exit with error code 9
 }
 

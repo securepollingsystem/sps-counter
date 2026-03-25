@@ -8,7 +8,7 @@
     "serve": "tsx watch server.ts || stty sane",
     "lintfix": "eslint '**/*.{ts,tsx}' --fix",
     "lint": "eslint '**/*.{ts,tsx}'",
-    "lintserver": "eslint server.ts server/config.ts"
+    "lintserver": "eslint server.ts 'server/*.ts'"
   },
   "dependencies": {
     "cors": "^2.8.5",

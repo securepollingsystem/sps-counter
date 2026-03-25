@@ -5,7 +5,6 @@ import sps_logo from './assets/secure polling.svg';
 import './style.css';
 
 export function App() {
-
   return (
     <div>
       <a href="https://securepollingsystem.org" target="_blank">
@@ -13,7 +12,7 @@ export function App() {
       </a>
       <h1>Manage counting and collating data from an SPS central server</h1>
       <GetInfo
-      url="http://stemgrid.org:8994/info"
+      url={window.location.href+"info"}
       />
       <section>
         <Resource
