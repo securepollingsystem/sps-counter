@@ -5,7 +5,7 @@ import fs from 'fs';
 import cors from 'cors';
 import { verifyScreedSignature } from 'sps-common';
 import { loadConfig } from './server/config';
-import { setupOpinionsRoute, storeScreed, maybeUpdateOpinionCounts } from './counter.js';
+import { setupOpinionsRoute, storeScreed, maybeUpdateOpinionCounts } from './server/counter';
 
 let configFileName = process.env.SPS_CONFIG_FILE; // check environment for SPS_CONFIG_FILE
 if (configFileName === undefined) {

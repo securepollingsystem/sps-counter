@@ -20,6 +20,7 @@ export async function loadConfig(configFileName) {
     config = YAML.parse(fs.readFileSync(configFileName, {encoding: 'utf8'}));
   } catch (err) {
     console.error('Error reading config file ' + configFileName, err);
+    process.exit(2);
   }
 
   const serverFunction = await readConfig(config, 'serverFunction', 'undefined'); // must be 'central-server' or 'counter'

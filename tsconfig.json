@@ -20,5 +20,5 @@
       "react-dom": ["./node_modules/preact/compat/"]
     }
   },
-  "include": ["server.ts", "vite.config.ts"]
+  "include": ["server.ts", "vite.config.ts", "server/*.ts"]
 }
