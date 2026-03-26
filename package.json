@@ -6,6 +6,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "serve": "tsx watch server.ts || stty sane",
+    "test": "jest",
     "lintfix": "eslint '**/*.{ts,tsx}' --fix",
     "lint": "eslint '**/*.{ts,tsx}'",
     "lintserver": "eslint server.ts 'server/*.ts'"
@@ -21,16 +22,31 @@
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.9.3",
+    "@types/jest": "^29.5.12",
     "@types/node": "^25.0.3",
+    "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^8.50.0",
     "@typescript-eslint/parser": "^8.50.0",
     "eslint": "^9.39.2",
     "eslint-config-preact": "^2.0.0",
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.1.2",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.50.0",
     "vite": "^6.0.4"
   },
   "eslintConfig": {
     "extends": "preact"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "extensionsToTreatAsEsm": [".ts"],
+    "globals": {
+      "ts-jest": {
+        "useESM": true
+      }
+    }
   }
 }

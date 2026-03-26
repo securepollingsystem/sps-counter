@@ -1,0 +1,37 @@
+1. Update tsconfig.json:
+
+Add "esModuleInterop": true to compilerOptions to allow default imports for supertest.
+Add "jest" to the types array so Jest globals (describe, it, expect, etc.) are recognized.
+Update include to include test files, e.g., add "**/*.test.ts" or specifically "server.test.ts".
+
+2. Update Jest configuration in package.json:
+
+Replace the deprecated globals config with the new transform format:
+"transform": {
+  "^.+\\.ts$": ["ts-jest", { "useESM": true }]
+}
+Remove the old globals section.
+
+3. Fix type issues in server.test.ts:
+
+Correct the mock types for loadConfig and other mocked functions to avoid "never" type errors.
+Ensure mocked functions are properly typed as jest.MockedFunction where appropriate.
+Fix the app parameter in the setupOpinionsRoute mock implementation to be typed as express.Application.
+
+4. Install missing dependencies if needed:
+
+Although @types/jest is already in devDependencies, ensure it's properly recognized after config changes.
+
+5. Run tests again after fixes to verify and address any remaining runtime or type errors. - Remove the old globals section.
+
+6. Fix type issues in server.test.ts:
+
+Correct the mock types for loadConfig and other mocked functions to avoid "never" type errors.
+Ensure mocked functions are properly typed as jest.MockedFunction where appropriate.
+Fix the app parameter in the setupOpinionsRoute mock implementation to be typed as express.Application.
+
+7. Install missing dependencies if needed:
+
+Although @types/jest is already in devDependencies, ensure it's properly recognized after config changes.
+
+8. Run tests again after fixes to verify and address any remaining runtime or type errors.
