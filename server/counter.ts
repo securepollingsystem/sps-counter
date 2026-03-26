@@ -70,9 +70,8 @@ async function sqlGetCount(pool, sqlCountQuery) {
   return count_obj[0].count.toString();
 };
 
-export function setupOpinionsRoute(app, pool, logAccess, counters) {
+export function setupOpinionsRoute(app, pool, logAccess) {
   app.get('/opinions', async (req, res) => {
-    counters.searchesToday += 1;
     let opinions = 'unpopulated';
     let sqlString = 'unpopulated';
     if ( req.query.subset ) { // '?subset=' returns false here

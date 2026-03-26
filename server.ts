@@ -53,7 +53,6 @@ try {
 
 const logLevel = 2; // how much info to put in the log file
 const startTime = Date.now(); // store the time this program starts
-let searchesToday = 0; // how many queries have come in
 
 let lastUpdateOpinionCounts = Date.now(); // when's the last time we checked updated_at in all opinions
 let lastStoreScreed = lastUpdateOpinionCounts + 1000; // when's the last time we stored a new/updated screed
@@ -100,7 +99,7 @@ const main = async () => {
 
   app.use(express.static('dist')); // automatically routes / to index.html
 
-  setupOpinionsRoute(app, pool, logAccess, { searchesToday });
+  setupOpinionsRoute(app, pool, logAccess);
 
   app.get('/ipv4', (req, res) => {
     console.log(req);
@@ -112,7 +111,7 @@ const main = async () => {
     // check globals or logs for server activity stats to report
     return res.json({ "screeds stored"  : await sqlGetCount(sql.unsafe`SELECT COUNT(pubkey) FROM sps.screeds`),
                       "opinions held"   : await sqlGetCount(sql.unsafe`SELECT COUNT(screed_count) FROM sps.opinions WHERE screed_count > 0`),
-                      "searches today"  : searchesToday,
+                      "searches today"  : 'unknown',
                       "unique visitors today": `unique_visitors_today`,
                       "hours since server started" : uptimePresent().toFixed(1),
                       "total hours active"     : uptimeTotal().toFixed(1)
