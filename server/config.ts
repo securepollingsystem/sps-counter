@@ -24,7 +24,7 @@ export async function loadConfig(configFileName) {
   }
 
   const serverFunction = await readConfig(config, 'serverFunction', 'undefined'); // must be 'central-server' or 'counter'
-  const logFileName = await readConfig(config, 'logfile', 'sps-counter.log');
+  //const logFileName = await readConfig(config, 'logfile', 'sps-counter.log');
   const allowedOrigins = await readConfig(config, 'allowedOrigins', []); // URLs that are allowed to connect here
   const blockList = await readConfig(config, 'blockList', []); // IP addresses or prefixes that we simply ignore
   const serverPort = await readConfig(config, 'serverPort', 8994); // port on which this server listens (default 8994)
@@ -43,5 +43,5 @@ export async function loadConfig(configFileName) {
           + await readConfig(postgresconfig, 'database', 'postgres');
   }
 
-  return { serverFunction, logFileName, allowedOrigins, blockList, serverPort, postGresURI };
+  return { serverFunction, allowedOrigins, blockList, serverPort, postGresURI };
 }

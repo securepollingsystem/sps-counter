@@ -1,7 +1,6 @@
 'use strict';
 import express from 'express';
 import { createPool, sql } from 'slonik';
-import fs from 'fs';
 import cors from 'cors';
 import { verifyScreedSignature } from 'sps-common';
 import { loadConfig } from './server/config';
@@ -12,7 +11,7 @@ if (configFileName === undefined) {
   configFileName = import.meta.url.replace('file://','') + '.yaml'; // default config filename is this file .yaml
 }
 
-const { serverFunction, logFileName, allowedOrigins, blockList, serverPort, postGresURI } = await loadConfig(configFileName);
+const { serverFunction, allowedOrigins, blockList, serverPort, postGresURI } = await loadConfig(configFileName);
 
 if (serverFunction === 'central-server') {
   console.log('serverFunction === central-server');
@@ -24,34 +23,6 @@ if (serverFunction === 'central-server') {
 }
 
 // TODO: use postgres to store our uptime
-// TODO: use log4js instead of this
-let logFileLastLine = ''; // we will try to read the last line of the logfile
-try {
-  logFileLastLine = fs.readFileSync(logFileName, {encoding: 'utf8'})
-    .split(/\r?\n/).filter(i => i !== '').at(-1);
-} catch (err) {
-  console.error("Error occurred:", err.message);
-  console.log('Unable to find logfile', logFileName, ', this is normal the first time this server runs');
-}
-
-let totalUptimeFromLogFile = parseFloat(logFileLastLine.split(' ')[7],10);
-if (isNaN(totalUptimeFromLogFile)) {
-  console.log('last line of logfile didn\'t contain total uptime, assuming 0.0');
-  totalUptimeFromLogFile = 0.0;
-}
-console.log('total uptime from log file:',totalUptimeFromLogFile);
-
-let logFile;
-try {
-  logFile = fs.createWriteStream(logFileName, { flags: 'a' }); // open logfile stream for append
-} catch (err) {
-  console.error("Error occurred:", err.message);
-  console.log('Unable to write to logfile', logFileName, ', perhaps I don\'t have permission');
-  console.log('Shutting down...');
-  process.exit(1); // exit with error code 1
-}
-
-const logLevel = 2; // how much info to put in the log file
 const startTime = Date.now(); // store the time this program starts
 
 let lastUpdateOpinionCounts = Date.now(); // when's the last time we checked updated_at in all opinions
@@ -175,9 +146,6 @@ function logAccess(req, addlInfo) {
   }
   const logLine = `${Date().slice(0,24)} ${ip} asks for ${req.url} using ${req.headers['user-agent']} ${addlInfo}`;
   console.log(logLine);
-  if (logLevel > 1) {
-    logFile.write(logLine + '\n');
-  }
   return ip;
 }
 
@@ -186,12 +154,12 @@ function uptimePresent() {
 }
 
 function uptimeTotal() {
-  return uptimePresent() + totalUptimeFromLogFile;
+  return uptimePresent() + 8;
 }
 
 process.on('SIGINT', () => {
   console.log('Shutting down...');
-  logFile.write('sps-server closed after ' + uptimePresent().toFixed(0) + ' hours, total uptime ' + uptimeTotal().toFixed(3) + ' hours\n');
+  console.log('sps-server closed after ' + uptimePresent().toFixed(0) + ' hours, total uptime ' + uptimeTotal().toFixed(3) + ' hours\n');
   process.exit(0); // This allows Node to exit normally, restoring terminal state
 });
 
