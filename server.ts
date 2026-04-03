@@ -4,7 +4,7 @@ import { createPool, sql } from 'slonik';
 import cors from 'cors';
 import { verifyScreedSignature } from 'sps-common';
 import { loadConfig } from './server/config';
-import { setupOpinionsRoute, storeScreed, maybeUpdateOpinionCounts } from './server/counter';
+import { setupCounterServer, storeScreed } from './server/counter';
 
 let configFileName = process.env.SPS_CONFIG_FILE; // check environment for SPS_CONFIG_FILE
 if (configFileName === undefined) {
@@ -13,20 +13,8 @@ if (configFileName === undefined) {
 
 const { serverFunction, allowedOrigins, blockList, serverPort, postGresURI } = await loadConfig(configFileName);
 
-if (serverFunction === 'central-server') {
-  console.log('serverFunction === central-server');
-} else if (serverFunction === 'counter') {
-  console.log('serverFunction === counter');
-} else {
-  console.error('Error: serverFunction must be "central-server" or "counter", got ', typeof(serverFunction), serverFunction);
-  process.exit(1); // exit with error code 9
-}
-
 // TODO: use postgres to store our uptime
 const startTime = Date.now(); // store the time this program starts
-
-let lastUpdateOpinionCounts = Date.now(); // when's the last time we checked updated_at in all opinions
-let lastStoreScreed = lastUpdateOpinionCounts + 1000; // when's the last time we stored a new/updated screed
 
 const main = async () => {
   let pool;
@@ -70,7 +58,17 @@ const main = async () => {
 
   app.use(express.static('dist')); // automatically routes / to index.html
 
-  setupOpinionsRoute(app, pool, logAccess);
+  if (serverFunction === 'central-server') {
+    console.log('serverFunction === central-server');
+    console.log('not implemented yet');
+    process.exit(1); // exit with error code 9
+  } else if (serverFunction === 'counter') {
+    console.log('serverFunction === counter');
+    setupCounterServer(app, pool, logAccess);
+  } else {
+    console.error('Error: serverFunction must be "central-server" or "counter", got ', typeof(serverFunction), serverFunction);
+    process.exit(1); // exit with error code 9
+  }
 
   app.get('/ipv4', (req, res) => {
     console.log(req);
@@ -122,7 +120,6 @@ const main = async () => {
         if (screedIsSigned) {
           console.log('verifyScreedSignature:',screedIsSigned);
           await storeScreed(pool, dataBuffer);
-          lastStoreScreed = Date.now(); // update time when this last happened
         } else {
           console.log('verifyScreedSignature failed:', screedIsSigned);
         }
@@ -134,8 +131,6 @@ const main = async () => {
   app.listen(serverPort, () => {
     console.log(`Example app listening on port ${serverPort}`)
   });
-
-  setInterval(async () => { lastUpdateOpinionCounts = await maybeUpdateOpinionCounts(pool, lastUpdateOpinionCounts, lastStoreScreed); }, 1000);
 };
 
 function logAccess(req, addlInfo) {

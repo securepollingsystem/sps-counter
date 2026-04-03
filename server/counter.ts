@@ -2,7 +2,11 @@
 
 import { sql } from 'slonik';
 
+let lastUpdateOpinionCounts = Date.now(); // when's the last time we checked updated_at in all opinions
+let lastStoreScreed = lastUpdateOpinionCounts + 1000; // when's the last time we stored a new/updated screed
+
 export async function storeScreed(pool, signedScreedObject) {
+  lastStoreScreed = Date.now(); // update time when this last happened
   const sqlString = sql.unsafe`
     INSERT INTO sps.screeds (pubkey, signer_key, sig_expires, modified)
     VALUES (
@@ -25,7 +29,7 @@ export async function storeScreed(pool, signedScreedObject) {
       console.log('Skipping invalid opinion type:', typeof(opinionText), 'value:', opinionText);
       continue;
     }
-    const sqlline = sql.unsafe`SELECT id FROM sps.opinions WHERE opinion = ${opinionText}`;
+    const sqlline = sql.unsafe`SELECT id FROM sps.opinions WHERE opinion = ${opinionText}`; //  using sql.unsafe with ${} placeholders is safe. The name exists to make developers aware they're using a lower-level API, but injection protection remains intact
     const opinionRow = await pool.maybeOne(sqlline);
     let opinionId;
     if (!opinionRow) {
@@ -43,7 +47,7 @@ export async function storeScreed(pool, signedScreedObject) {
   return response;
 };
 
-export async function maybeUpdateOpinionCounts(pool, lastUpdateOpinionCounts, lastStoreScreed) { // run updateOpinionCounts if needed
+async function maybeUpdateOpinionCounts(pool, lastUpdateOpinionCounts, lastStoreScreed) { // run updateOpinionCounts if needed
   if (lastUpdateOpinionCounts < lastStoreScreed) { // compare the last time updateOpinionCounts ran to the most recent storeScreed time
     const newestScreedTimeObj = await pool.any(sql.unsafe`SELECT MAX(modified) FROM sps.screeds`); // get timestamp of newest record in sps.screeds modified
     const newestScreedTime = newestScreedTimeObj[0].max; // just the unixtime value (in milliseconds)
@@ -70,7 +74,7 @@ async function sqlGetCount(pool, sqlCountQuery) {
   return count_obj[0].count.toString();
 };
 
-export function setupOpinionsRoute(app, pool, logAccess) {
+export function setupCounterServer(app, pool, logAccess) {
   app.get('/opinions', async (req, res) => {
     let opinions = 'unpopulated';
     let sqlString = 'unpopulated';
@@ -86,4 +90,6 @@ export function setupOpinionsRoute(app, pool, logAccess) {
     res.setHeader('Content-Type', 'application/json'); // https://stackoverflow.com/questions/19696240/proper-way-to-return-json-using-node-or-express
     res.json(opinions);
   });
+
+  setInterval(async () => { lastUpdateOpinionCounts = await maybeUpdateOpinionCounts(pool, lastUpdateOpinionCounts, lastStoreScreed); }, 1000);
 }
