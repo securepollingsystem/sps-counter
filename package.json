@@ -11,8 +11,10 @@
     "lintserver": "eslint server.ts 'server/*.ts'"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "express-session": "^1.19.0",
     "preact": "^10.25.3",
     "slonik": "^47.3.2",
     "sps-common": "^1.1.3",

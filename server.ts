@@ -5,6 +5,7 @@ import cors from 'cors';
 import { verifyScreedSignature } from 'sps-common';
 import { loadConfig } from './server/config';
 import { setupCounterServer, storeScreed } from './server/counter';
+import { setupLoginApi } from './server/login';
 
 let configFileName = process.env.SPS_CONFIG_FILE; // check environment for SPS_CONFIG_FILE
 if (configFileName === undefined) {
@@ -69,6 +70,8 @@ const main = async () => {
     console.error('Error: serverFunction must be "central-server" or "counter", got ', typeof(serverFunction), serverFunction);
     process.exit(1); // exit with error code 9
   }
+
+  setupLoginApi(app, logAccess);
 
   app.get('/ipv4', (req, res) => {
     console.log(req);

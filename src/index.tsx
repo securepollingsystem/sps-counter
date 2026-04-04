@@ -11,8 +11,10 @@ export function App() {
         <img src={sps_logo} alt="Secure Polling System" height="160" width="160" />
       </a>
       <h1>Manage counting and collating data from an SPS central server</h1>
+      <Login />
+      <Logout />
       <GetInfo
-      url={"http://stemgrid.org:8994/info" /* window.location.href+"info" */}
+      url={"http://localhost:8994/info" /* window.location.href+"info" */}
       />
       <section>
         <Resource
@@ -77,6 +79,64 @@ function Resource(props) {
       <p>{props.description}</p>
     </a>
   );
+}
+
+function Login(props) {
+  return (
+  <div id="login-box">
+    <h3>Login</h3>
+    <div id="error" class="error"></div>
+    <input type="text" id="user" placeholder="Username (alice)" autocomplete="username" />
+    <input type="password" id="pass" placeholder="Password (secret123)" autocomplete="current-password" />
+    <button onClick={login}>Sign In</button>
+  </div>
+  );
+}
+
+function Logout(props) {
+  return (
+  <div id="app-box" class="hidden">
+    <p>Welcome, <strong id="username"></strong></p>
+    <button onClick={logout}>Logout</button>
+  </div>
+  );
+}
+
+async function login() {
+  const username = document.getElementById('user').value;
+  const password = document.getElementById('pass').value;
+
+  try {
+    const res = await fetch('http://localhost:8994/api/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username, password})
+    });
+
+    if (res.ok) {
+      showApp();
+    } else {
+      document.getElementById('error').textContent = 'Invalid username or password';
+    }
+  } catch (e) {
+    document.getElementById('error').textContent = e.toString;
+  }
+}
+
+async function logout() {
+  await fetch('http://localhost:8994/api/logout', {method: 'POST'});
+  document.getElementById('login-box').classList.remove('hidden');
+  document.getElementById('app-box').classList.add('hidden');
+}
+
+async function showApp() {
+  const res = await fetch('http://localhost:8994/api/me');
+  if (res.ok) {
+    const data = await res.json();
+    document.getElementById('username').textContent = data.user;
+    document.getElementById('login-box').classList.add('hidden');
+    //document.getElementById('app-box').classList.remove('hidden');
+  }
 }
 
 render(<App />, document.getElementById('app'));
