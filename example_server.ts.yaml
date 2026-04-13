@@ -1,0 +1,8 @@
+# secure polling system config file
+name: secure polling system
+serverFunction: counter
+logfile: sps-counter.log
+pOsTgREsuri: postgresql://user:password@localhost:5432/spsdata
+allowedorigins:
+  - https://demo.securepollingsystem.org
+  - https://demo.securepollingsystem.com
