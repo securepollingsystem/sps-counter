@@ -5,48 +5,6 @@ import { sql } from 'slonik';
 let lastUpdateOpinionCounts = Date.now(); // when's the last time we checked updated_at in all opinions
 let lastStoreScreed = lastUpdateOpinionCounts + 1000; // when's the last time we stored a new/updated screed
 
-export async function storeScreed(pool, signedScreedObject) {
-  lastStoreScreed = Date.now(); // update time when this last happened
-  const sqlString = sql.unsafe`
-    INSERT INTO sps.screeds (pubkey, signer_key, sig_expires, modified)
-    VALUES (
-      ${signedScreedObject.publicKey},
-      ${'signer_key'},
-      TO_TIMESTAMP(${1758394589}),
-      NOW()
-    )
-    ON CONFLICT (pubkey)
-    DO UPDATE SET modified = NOW()
-  `; // EXCLUDED.signer_key means the value that was attempted to be inserted into signer_key
-  const response = await pool.any(sqlString);
-
-  // Delete any existing screedlines for this screed_key and then we will repopulate them
-  await pool.any(sql.unsafe`DELETE FROM sps.screedlines WHERE screed_key = ${signedScreedObject.publicKey}`);
-
-  // For each item in signedScreedObject.screed, check if opinion exists and if not, insert it.  Grab its id.
-  for (const opinionText of JSON.parse(signedScreedObject.screed)) {
-    if (typeof opinionText !== 'string' || !opinionText.trim()) {
-      console.log('Skipping invalid opinion type:', typeof(opinionText), 'value:', opinionText);
-      continue;
-    }
-    const sqlline = sql.unsafe`SELECT id FROM sps.opinions WHERE opinion = ${opinionText}`; //  using sql.unsafe with ${} placeholders is safe. The name exists to make developers aware they're using a lower-level API, but injection protection remains intact
-    const opinionRow = await pool.maybeOne(sqlline);
-    let opinionId;
-    if (!opinionRow) {
-      const insertResult = await pool.one(sql.unsafe`INSERT INTO sps.opinions (opinion, screed_count) VALUES (${opinionText}, 1) RETURNING id`);
-      if (!insertResult || !insertResult.id) {
-        console.error('Failed to insert opinion:', opinionText, 'insertResult:', insertResult);
-        continue;
-      }
-      opinionId = insertResult.id;
-    } else {
-      opinionId = opinionRow.id;
-    }
-    await pool.any(sql.unsafe`INSERT INTO sps.screedlines (screed_key, opinion_id) VALUES (${signedScreedObject.publicKey}, ${opinionId})`);
-  }
-  return response;
-};
-
 async function maybeUpdateOpinionCounts(pool, lastUpdateOpinionCounts, lastStoreScreed) { // run updateOpinionCounts if needed
   if (lastUpdateOpinionCounts < lastStoreScreed) { // compare the last time updateOpinionCounts ran to the most recent storeScreed time
     const newestScreedTimeObj = await pool.any(sql.unsafe`SELECT MAX(modified) FROM sps.screeds`); // get timestamp of newest record in sps.screeds modified

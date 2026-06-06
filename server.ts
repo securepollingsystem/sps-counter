@@ -4,7 +4,8 @@ import { createPool, sql } from 'slonik';
 import cors from 'cors';
 import { verifyScreedSignature } from 'sps-common';
 import { loadConfig } from './server/config';
-import { setupCounterServer, storeScreed } from './server/counter';
+import { setupCentralServer, storeScreed } from './server/central-server';
+import { setupCounterServer } from './server/counter';
 
 let configFileName = process.env.SPS_CONFIG_FILE; // check environment for SPS_CONFIG_FILE
 if (configFileName === undefined) {
@@ -60,11 +61,11 @@ const main = async () => {
 
   if (serverFunction === 'central-server') {
     console.log('serverFunction === central-server');
-    console.log('not implemented yet');
-    process.exit(1); // exit with error code 9
+    setupCentralServer(app, pool, logAccess);
   } else if (serverFunction === 'counter') {
     console.log('serverFunction === counter');
     setupCounterServer(app, pool, logAccess);
+    setupCentralServer(app, pool, logAccess); // TODO: just testing this
   } else {
     console.error('Error: serverFunction must be "central-server" or "counter", got ', typeof(serverFunction), serverFunction);
     process.exit(1); // exit with error code 9
