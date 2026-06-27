@@ -2,7 +2,14 @@
 name: secure polling system
 serverFunction: counter
 logfile: sps-counter.log
-pOsTgREsuri: postgresql://user:password@localhost:5432/spsdata
+# use either postGresUri OR specify postgres: parameters
+postGresUri: postgresql://user:password@localhost:5432/spsdata
+#postgres:
+#  user: username
+#  password: password
+#  address: localhost
+#  port: 5432
+#  database: spsdata
 allowedorigins:
   - https://demo.securepollingsystem.org
   - https://demo.securepollingsystem.com
